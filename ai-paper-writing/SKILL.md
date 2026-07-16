@@ -1,813 +1,852 @@
 ---
 name: ai-paper-writing
-description: Draft, revise, and compress an AI, NLP, or LLM conference paper under a configurable main-text page limit. Use this skill for full-paper writing, section rewriting, proportional page-budget planning, method naming, experiment organization, appendix design, and final consistency review.
+description: Write, revise, organize, compile, and audit an AI, NLP, or LLM research paper in LaTeX under a configurable main-text page limit. Use this skill for paper planning, section drafting, method naming, experiment organization, appendix design, consistency checking, citation verification, and final LaTeX validation.
 ---
 
 # AI Paper Writing
 
+## 1. Purpose
 
-## LaTeX Editing, Compilation, and Validation
+Produce a complete, technically precise, logically coherent, and submission-ready AI research paper in academic English.
 
-This skill is intended for directly editing, compiling, and validating a LaTeX research paper.
+The paper should:
 
-### Compilation command
+1. Define an important and concrete research problem.
+2. Identify specific limitations in the strongest relevant prior work.
+3. Present a clear technical insight.
+4. Develop a coherent method with two or three named core components.
+5. Validate every central claim through appropriate experiments.
+6. Maintain consistent notation, terminology, evidence, and narrative across the full manuscript.
+7. Fit the target venue's page limit without weakening the main technical contribution.
+8. Compile successfully as a LaTeX project.
+9. Contain no fabricated, unverifiable, or incorrectly attributed citation.
 
-At the beginning of the workflow, compile the manuscript from the project root with:
+The full paper should follow one continuous argument:
 
-```bash
-latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
-```
+`problem -> limitation -> challenge -> insight -> method -> evidence -> implication`
 
-Use the same command after every substantial revision and before the final review.
+Do not treat the paper as a collection of independent sections. Every section must advance the same central story.
 
-The standard workflow is:
+## 2. Paper Configuration
 
-1. Compile the current manuscript before editing.
-2. Inspect the first blocking error and the surrounding source.
-3. Correct the LaTeX source rather than hiding the error.
-4. Recompile with the same command.
-5. Repeat until compilation succeeds.
-6. Inspect the generated PDF for page count, section balance, figure placement, table placement, equation layout, cross-references, bibliography output, and visible formatting problems.
+Before drafting, revising, or checking the manuscript, define:
 
-Do not claim that the manuscript is complete while the final compilation fails.
+1. `MAIN_TEXT_PAGE_LIMIT = P`
+2. `PAGE_COUNT_SCOPE`
+3. `FILL_TARGET`
+4. `SECTION_RATIOS`
+5. `TARGET_VENUE`
+6. `MAIN_TEX_FILE`, usually `main.tex`
 
-### Severe error resolution
+### 2.1 Main-text page limit
 
-Prioritize errors that affect correctness, reproducibility, or the final PDF.
+`P` is the maximum number of main-text pages allowed by the venue or specified by the user.
 
-Check and resolve the following whenever possible:
+Do not assume that `P` equals seven. Obtain it from the user, venue instructions, or project files. When it is unavailable, use `[MAIN_TEXT_PAGE_LIMIT]` and avoid fixed page-count claims.
 
-1. Missing citations, including unresolved `\cite{...}` keys and citations absent from the bibliography.
-2. Missing references, including unresolved `\ref{...}`, `\autoref{...}`, `\cref{...}`, and related commands.
-3. Duplicate labels such as repeated `\label{...}` identifiers.
-4. Undefined labels or labels attached to the wrong equation, figure, table, algorithm, theorem, or section.
-5. Duplicate BibTeX keys.
-6. Missing figures, tables, style files, bibliography files, or other required inputs.
-7. Broken environments, unmatched braces, unclosed math mode, and invalid command usage.
-8. Package conflicts and incompatible document-class options.
-9. Incorrect figure or table paths.
-10. Fatal bibliography-processing errors.
-11. Numbering inconsistencies caused by misplaced labels or manual numbering.
-12. Cross-references that remain unresolved after the required compilation passes.
+### 2.2 Page-count scope
 
-When compilation fails, report:
+Determine what the venue counts toward the main-text limit. Unless the venue specifies otherwise, treat the main text as all content before the references.
 
-`first blocking error -> source location -> likely cause -> concrete correction`
+### 2.3 Fill target
 
-Do not suppress a severe error merely to obtain a PDF.
+Use one of the following:
 
-### Warning reduction
+1. `within_limit`: the manuscript only needs to remain within `P`.
+2. `substantially_full`: the manuscript should make substantial use of the final permitted main-text page.
 
-After resolving blocking errors, reduce important warnings and visible layout defects.
+For compact conference papers, use `substantially_full` unless instructed otherwise.
 
-Prioritize:
+## 3. Core Writing Requirements
 
-1. Undefined citations and references.
-2. Multiply defined labels.
-3. Overfull `\hbox` and `\vbox` warnings that produce visible overflow.
-4. Equations extending beyond the column or page boundary.
-5. Tables wider than the available column or text width.
-6. Captions, URLs, code, or technical terms that overflow margins.
-7. Figures placed far from their first discussion.
-8. Widows, orphans, isolated headings, and nearly empty final columns when they damage readability.
-9. Float congestion that separates a table or figure from its interpretation.
-10. Bibliography entries with malformed output.
+### 3.1 Academic style
 
-For overfull equations, prefer mathematically readable corrections:
+1. Write in clear academic English.
+2. Do not use em dashes or en dashes as sentence punctuation.
+3. Hyphenated technical compounds are allowed, such as `decoding-based`, `training-free`, and `step-level`.
+4. Prefer direct sentences over deeply nested structures.
+5. Give each paragraph one primary purpose.
+6. Begin each paragraph with a clear topic or transition sentence.
+7. Avoid unnecessary rhetorical language.
+8. Avoid vague claims such as “substantial improvement” without evidence.
+9. Do not repeat the same motivation, contribution, or conclusion across sections.
+10. Keep terminology and capitalization consistent.
 
-1. Break long derivations across `aligned`, `split`, `multline`, or equivalent environments.
-2. Introduce intermediate notation when it improves clarity.
-3. Move nonessential derivations to the appendix.
-4. Shorten textual annotations inside equations.
-5. Avoid shrinking equations globally or using unreadably small font sizes.
-6. Avoid manually forcing line breaks that damage mathematical meaning.
+### 3.2 Evidence and factual integrity
 
-For overfull prose, tables, and references:
+1. Do not invent datasets, baselines, models, metrics, citations, hyperparameters, or results.
+2. Use precise placeholders when information is missing, such as `[DATASET COUNT]`, `[BEST IMPROVEMENT]`, or `[CITATION]`.
+3. Every contribution must be supported by a method design, formal argument, experiment, or analysis.
+4. Every statement about prior work must be supported by an accurate citation.
+5. Every numerical claim must match the corresponding table, figure, or logged result.
+6. Negative or mixed findings must not be hidden when they affect the paper's claim.
 
-1. Rewrite long sentences or technical phrases.
-2. Use appropriate breakable URL and bibliography handling.
-3. Reformat tables, abbreviate repeated headings, or move detailed columns to the appendix.
-4. Use a full-width table only when the venue allows it and the content requires it.
-5. Do not solve overflow by violating venue margins or font-size requirements.
+### 3.3 Reporting numerical results
 
-Not every harmless underfull warning needs correction. Focus first on warnings that indicate incorrect references, missing content, margin overflow, unreadable equations, or visibly poor layout.
+1. Do not copy large portions of tables into prose.
+2. Report only the most decision-relevant values.
+3. Explain trends, comparisons, causes, tradeoffs, and implications.
+4. Distinguish absolute gain, relative gain, and percentage-point gain.
+5. Do not claim statistical significance without a valid statistical test.
+6. Do not compare values from incompatible settings.
 
-### Final LaTeX validation
+## 4. Paper Argument Planning
 
-Before considering the paper complete:
+Before writing, identify:
 
-1. Run the compilation command from a clean enough state to confirm reproducibility.
-2. Confirm that the command exits successfully.
-3. Confirm that no citation or reference remains undefined.
-4. Confirm that no label is multiply defined.
-5. Confirm that all figures, tables, algorithms, equations, and appendix items are numbered and referenced correctly.
-6. Confirm that severe overfull warnings have been removed or explicitly justified.
-7. Inspect the final PDF rather than relying only on the log.
-8. Verify that bibliography, page count, anonymization, margins, fonts, and supplementary material follow the target venue requirements.
+1. The research problem.
+2. Why the problem matters.
+3. The strongest relevant recent approaches.
+4. Their exact limitations.
+5. Two or three unresolved challenges.
+6. The central technical intuition.
+7. Two or three novel components.
+8. The complete method pipeline.
+9. The datasets, models, baselines, metrics, and protocols.
+10. The strongest experimental evidence.
+11. The material that should move to the appendix.
 
-## Purpose
+Build an explicit challenge-to-method map:
 
-Write a complete, technically precise, and publication-ready research paper in academic English. The paper should present a clear problem, identify concrete limitations in prior work, develop a coherent method with two or three named innovations, and validate the method through well-structured experiments.
+| Challenge | Cause | Proposed Component | Expected Effect | Supporting Experiment |
+|---|---|---|---|---|
 
-## Paper-Length Configuration
+Every challenge introduced in the paper must be addressed by the method or explicitly declared outside the paper's scope.
 
-Before drafting, revising, or checking page allocation, define the following variables:
+## 5. Method and Component Naming
 
-1. `MAIN_TEXT_PAGE_LIMIT = P`: the permitted number of main-text pages.
-2. `PAGE_COUNT_SCOPE`: the content counted toward `P`, according to the target venue. Unless the venue specifies otherwise, treat the main text as all paper content before the references.
-3. `FILL_TARGET`: whether the manuscript should merely remain within the limit or should substantially fill the final permitted main-text page. For conference-paper drafting, use `substantially_full` unless instructed otherwise.
-4. `SECTION_RATIOS`: the target proportional allocation defined in the page-budget section below.
+Create a short and memorable method name.
 
-Do not assume a fixed value for `P`. Obtain it from the user, venue instructions, or supplied manuscript requirements. When it is unavailable, use the placeholder `[MAIN_TEXT_PAGE_LIMIT]` and avoid making fixed page-count claims.
-
-All later page allocations, overflow checks, and final-page checks must be calculated from `P`.
-
-## Non-Negotiable Writing Rules
-
-1. Do not use em dashes or en dashes as sentence punctuation. Use commas, parentheses, colons, or separate sentences instead.
-2. Hyphenated technical compounds are allowed, such as `decoding-based`, `training-free`, and `step-level`.
-3. Prefer direct academic sentences. Avoid deeply nested clauses, excessive qualifications, and unnecessarily complicated syntax.
-4. Each paragraph should have one primary purpose and a clear topic sentence.
-5. Do not repeat all numerical values from a table in the prose. Report only the most decision-relevant results, then explain the trend, implication, or reason.
-6. Do not invent datasets, baselines, model names, citations, hyperparameters, or experimental results. Use explicit placeholders when information is missing.
-7. Keep terminology, notation, module names, and task names consistent throughout the paper.
-8. Every claimed contribution must be supported by either a methodological design, a theoretical argument, or experimental evidence.
-9. The proposed method must directly address the challenges identified in the introduction.
-10. Avoid generic claims such as “significantly improves performance” unless the corresponding evidence is stated or cited.
-
-## Expected Inputs
-
-Use all available materials, including the research idea, draft text, equations, figures, experimental tables, implementation details, and target venue requirements.
-
-Before drafting, identify the following items:
-
-1. The studied problem and why it matters.
-2. The limitations of the strongest recent methods.
-3. Two or three technical challenges that prevent a simple solution.
-4. The central intuition behind the proposed method.
-5. The two or three most novel technical components.
-6. The datasets, baselines, backbone models, metrics, and evaluation protocols.
-7. The strongest experimental findings.
-8. The material that can be moved to the appendix.
-
-When essential information is missing, preserve the structure and insert precise placeholders such as `[DATASET COUNT]`, `[BEST IMPROVEMENT]`, or `[CITATION]`.
-
-## Core Planning Procedure
-
-### Step 1: Build the paper argument
-
-Construct the paper around the following chain:
-
-`important problem -> limitation of existing methods -> unresolved challenges -> key intuition -> proposed design -> experimental evidence -> contribution`
-
-Every major section should advance this chain. Do not introduce a challenge that is never addressed. Do not introduce a module without explaining which challenge it solves.
-
-### Step 2: Name the method and its components
-
-Create a short and memorable method name. A preferred title pattern is:
+A useful title pattern is:
 
 `<MethodName>: <Core Technique> for <Task or Problem>`
 
-Split the most novel part of the method into two or three components. Give each component a concise, parallel, and technically meaningful name.
+Split the most novel part of the method into two or three named components.
 
-Good component names should satisfy the following conditions:
+Each component name should:
 
-1. They describe the component’s function rather than using vague labels such as “Module A”.
-2. They are easy to reuse in equations, captions, tables, and ablation studies.
-3. They follow a parallel naming pattern.
-4. They do not force an unnatural acronym.
-5. Each component corresponds to a specific challenge or design objective.
+1. Describe its actual function.
+2. Be concise and easy to reuse.
+3. Follow a parallel naming pattern.
+4. Avoid vague names such as “Module A”.
+5. Avoid forced or misleading acronyms.
+6. Correspond to a specific challenge or design objective.
 
 For each component, define:
 
-`challenge -> design motivation -> input -> transformation -> output -> role in the full framework`
+`challenge -> motivation -> input -> operation -> output -> role in the framework`
 
-### Step 3: Allocate the proportional page budget
+Use the same component names in:
+
+1. The abstract.
+2. The introduction.
+3. The framework figure.
+4. The methodology.
+5. The ablation study.
+6. The conclusion.
+
+## 6. Main-Text Page Allocation
 
 Let `P` denote `MAIN_TEXT_PAGE_LIMIT`.
 
-Use the following target distribution for the main text:
+Use the following initial allocation:
 
-1. Abstract: `0.03P`, about 3 percent.
-2. Introduction: `0.08P`, about 8 percent.
-3. Related Work: `0.08P`, about 8 percent.
-4. Problem Formulation or Preliminaries: `0.07P`, about 7 percent.
-5. Methodology or Design: `0.42P`, about 42 percent.
-6. Evaluation: `0.20P`, about 20 percent.
-7. Conclusion: `0.02P`, about 2 percent.
+1. Abstract: `0.03P`
+2. Introduction: `0.08P`
+3. Related Work: `0.08P`
+4. Problem Formulation or Preliminaries: `0.07P`
+5. Methodology or Design: `0.42P`
+6. Evaluation: `0.20P`
+7. Conclusion: `0.02P`
+8. Figures, tables, captions, equations, algorithms, headings, spacing, and transitions: approximately `0.10P`
 
-These section ratios account for about `0.90P` of the available page area. Reserve the remaining `0.10P` for figures, tables, captions, equations, algorithms, subsection headings, spacing, and transitions.
+Compute:
 
-Compute the initial target for each section as:
+`target_pages(section) = P × section_ratio`
 
-`section page target = P × section ratio`
+These are page-area targets, not rigid text-only limits. Adjust them after compiling the manuscript.
 
-Treat these values as page-area targets rather than rigid text-only page counts. Round them to practical layout increments after compiling the manuscript. A section may deviate from its target when the technical content requires it, but the total main text must remain within `P`.
+Protect the Methodology and Evaluation sections. When space is limited, first compress or move:
 
-Protect the Methodology and Evaluation sections when adjusting the layout. Move secondary details to the appendix instead of compressing the core technical story. When `FILL_TARGET = substantially_full`, the final permitted main-text page should contain substantial content rather than only a few lines.
+1. Generic background.
+2. Long Related Work descriptions.
+3. Dataset statistics.
+4. Baseline implementation details.
+5. Hyperparameter details.
+6. Prompt templates.
+7. Additional results.
+8. Secondary ablations.
 
-## Section Blueprint
+Do not fill pages with generic prose. Expand only technically useful content, such as missing motivation, component interaction, result interpretation, limitations, or failure analysis.
 
-## Title
+## 7. Main-Text Organization
 
-Use a short method name followed by a precise technical description.
+### 7.1 Title
 
-The title should communicate both novelty and task. Avoid vague words such as “A New Framework” unless the second half clearly specifies the technical contribution.
+The title should communicate:
 
-Preferred pattern:
+1. The method name.
+2. The central technical idea.
+3. The target task or problem.
 
-`<Short Name>: <Novel Technique> for <New or Important Problem>`
+Avoid vague titles such as “A New Framework for AI”.
 
-## Abstract
+### 7.2 Abstract
 
-Write one compact paragraph that contains the following elements in order:
+Write one compact paragraph in this order:
 
-1. Introduce the problem and its significance.
-2. State the main technical challenge.
+1. Introduce the problem and its importance.
+2. State the main challenge.
 3. Summarize the dominant recent approach and its limitation.
 4. Introduce the proposed method.
-5. Describe the two or three core components.
-6. State the experimental scope, including the number of datasets, baselines, backbone models, or LLMs when available.
-7. Report only the strongest aggregate or representative improvement.
-8. End with the main conclusion or implication.
+5. Introduce the two or three named components.
+6. State the experimental scope.
+7. Report the strongest aggregate or representative result.
+8. End with the main implication.
 
-The method description must correspond directly to the stated challenge. Avoid background details, citations, equations, and long lists of results.
+The proposed method must directly address the stated challenge.
 
-## Introduction
+Do not include citations, equations, long background, or a list of every result.
 
-Organize the introduction into six paragraphs.
+### 7.3 Introduction
 
-### Paragraph 1: Background and significance
+Use a six-paragraph structure.
 
-Define the studied problem, explain why it matters, and establish its relevance to the target research community.
+#### Paragraph 1: Background and significance
 
-### Paragraph 2: State of the art and limitations
+Define the problem and explain why it matters.
 
-Summarize the most relevant recent direction. Explain what current methods can achieve and identify the limitation that motivates this paper.
+#### Paragraph 2: Existing approaches and limitation
 
-### Paragraph 3: Intuition and opportunity
+Summarize the strongest relevant direction and identify its concrete limitation.
 
-Present the key observation or opportunity that makes a better solution possible. This paragraph should prepare the reader for the proposed method without describing all implementation details.
+#### Paragraph 3: Key intuition
 
-### Paragraph 4: Challenges
+Explain the observation or opportunity that motivates the proposed solution.
 
-State two or three concrete challenges. Separate problem-level challenges from technical challenges when useful. Each challenge must later map to a methodological component.
+#### Paragraph 4: Technical challenges
 
-### Paragraph 5: Proposed framework
+State two or three precise challenges. These challenges must map to the named method components.
 
-Introduce the overall framework and its named components. Explain how information flows through the framework and how each component addresses a challenge. Include one concise sentence about the experimental evidence.
+#### Paragraph 5: Proposed framework and evidence
 
-### Paragraph 6: Contributions
+Introduce the full framework, its named components, their interactions, and a concise experimental summary.
 
-Present three contribution statements with conceptual, technical, and experimental coverage.
+#### Paragraph 6: Contributions
 
-A strong contribution structure is:
+Use three contribution statements:
 
-1. Conceptually, the paper reframes or formalizes the problem.
-2. Technically, the paper introduces the framework and its core components.
-3. Experimentally, the paper validates the method across datasets, models, settings, or transfer protocols.
+1. Conceptual contribution.
+2. Technical contribution.
+3. Experimental contribution.
 
-Do not claim novelty only through wording. State exactly what is new.
+Do not write generic contributions such as “We conduct extensive experiments” without specifying what is demonstrated.
 
-## Related Work
+### 7.4 Related Work
 
-Use two or three subsections. Each subsection should cover one recent and directly relevant research direction.
+Use two or three focused subsections.
 
 For each subsection:
 
 1. Define the research direction.
-2. Summarize representative recent methods.
-3. Identify the limitation that matters for the current paper.
+2. Summarize the most recent and relevant methods.
+3. Identify the limitation relevant to this paper.
 4. Explain how the proposed method differs.
 
-Do not write a chronological literature survey. Organize prior work around technical ideas, assumptions, or failure modes.
+Organize prior work by technical idea, assumption, or failure mode. Do not write a purely chronological survey.
 
-The final sentences of each subsection should create a clear transition to the proposed method. Avoid claiming that all previous methods are ineffective. Describe the precise setting in which their assumptions or designs become insufficient.
+The Related Work section should not attack prior work broadly. State the exact setting in which an assumption or design becomes insufficient.
 
-## Problem Formulation or Preliminaries
+### 7.5 Problem Formulation or Preliminaries
 
-Define the task, inputs, outputs, notation, and objective.
+Define:
 
-This section should include:
+1. The task.
+2. Inputs and outputs.
+3. Data or interaction setting.
+4. Core notation.
+5. Objective.
+6. Fundamental concepts needed by the method.
 
-1. A formal task definition.
-2. The data or interaction setting.
-3. The prediction, reasoning, generation, or decision objective.
-4. Any core concept required to understand the method.
-5. Evaluation-related definitions when they are fundamental to the problem.
+Introduce every symbol before use.
 
-Use equations only when they reduce ambiguity. Do not duplicate equations that belong to the Methodology section.
+Use equations when they reduce ambiguity. Do not duplicate equations that belong to the Methodology section.
 
-If the paper introduces a new formulation, clearly distinguish it from existing task definitions.
+### 7.6 Methodology or Design
 
-## Methodology or Design
+This is the central section.
 
-This is the central section and should receive the largest page budget.
+#### Overall framework
 
-### Overall framework
+Begin with a framework overview that explains:
 
-Begin with an overview that follows the actual computational or reasoning pipeline. Refer to the framework figure and explain:
+1. The input.
+2. Intermediate representations.
+3. The order of operations.
+4. Component interactions.
+5. The final output.
+6. The challenge addressed by each component.
 
-1. What enters the system.
-2. What intermediate representations are created.
-3. How the named components interact.
-4. What the final output is.
-5. How the design addresses the challenges from the introduction.
+The method must read as one coherent pipeline. Do not present it as an arbitrary stack of modules.
 
-The framework should read as one coherent solution. Do not present the method as an arbitrary stack of independent modules.
+#### Component subsections
 
-### Component subsections
+For each named component, follow this order:
 
-Use one subsection for each core component. For every component, follow this order:
+1. Motivation.
+2. Input and output.
+3. Mechanism.
+4. Formalization.
+5. Interaction with other components.
+6. Challenge mapping.
 
-1. Motivation: explain why the component is necessary.
-2. Input and output: define the interface with the rest of the framework.
-3. Design: explain the mechanism step by step.
-4. Formalization: provide the essential equations or algorithm.
-5. Interaction: explain how the component affects later stages.
-6. Challenge mapping: state which challenge it resolves.
+#### Integration and objective
 
-The two or three component subsections should have parallel depth and naming.
+Explain the complete training, inference, decoding, optimization, or decision procedure.
 
-### Integration and objective
+When relevant, distinguish:
 
-After the components, describe how they are combined. Include the training objective, inference procedure, decoding rule, optimization process, or decision policy when applicable.
+1. Offline preparation.
+2. Training.
+3. Online inference.
+4. Auxiliary model calls.
+5. Post-processing.
 
-When the method is training-free, clearly distinguish offline preparation, online inference, and any auxiliary computation.
+#### Methodology quality requirements
 
-When the method uses LLM prompts, describe the role of each prompt in the main text and place complete prompt templates in the appendix.
+1. Explain why every design choice is needed.
+2. Introduce notation before using it.
+3. Keep symbols consistent.
+4. Make the prose and equations describe the same operation.
+5. State computational cost when it is central.
+6. Move nonessential implementation details to the appendix.
+7. Do not rely on the framework figure as a substitute for technical explanation.
 
-### Methodology quality rules
-
-1. Explain why each design choice is needed.
-2. Avoid restating the framework figure without adding technical detail.
-3. Introduce notation before using it.
-4. Keep symbols consistent across equations and sections.
-5. State computational complexity or additional cost when it is a central concern.
-6. Use a running example only when it materially improves understanding.
-7. Move implementation details that do not affect the main argument to the appendix.
-
-## Evaluation
+### 7.7 Evaluation
 
 Organize the section around research questions.
 
-A recommended structure is:
+#### Experimental Setup
 
-### Experimental setup
+Briefly summarize:
 
-Briefly summarize datasets, models, baselines, metrics, and protocols. Keep the main text focused on information needed to interpret the results. Move complete statistics, templates, hyperparameters, and implementation details to the appendix.
+1. Datasets.
+2. Models or LLMs.
+3. Baselines.
+4. Metrics.
+5. Data splits.
+6. Transfer protocol.
+7. Evaluation settings.
 
-### RQ1: Overall effectiveness
+Move full details to the appendix.
 
-Compare the proposed method with the strongest and most relevant baselines.
+#### RQ1: Overall effectiveness
 
-Report:
+Answer whether the proposed method outperforms the strongest relevant baselines.
 
-1. The overall trend across datasets or settings.
-2. The strongest representative improvement.
-3. Cases where the gain is smaller or inconsistent.
-4. A technical explanation for the observed pattern.
+Discuss:
 
-Use tables for dense quantitative comparisons. Use figures for trends, scaling behavior, calibration, robustness, or qualitative analysis.
+1. Overall trend.
+2. Strongest representative gain.
+3. Settings with smaller or inconsistent gains.
+4. Technical explanation.
 
-### RQ2: Contribution of each component
+#### RQ2: Component contribution
 
-Conduct ablation studies that remove, replace, or simplify each named component.
+Use ablation studies to remove, replace, or simplify each named component.
 
-The analysis should explain:
+Explain:
 
-1. Which component contributes the most.
+1. Which component contributes most.
 2. Whether components are complementary.
-3. Whether the full framework is more than the sum of isolated modules.
-4. How the ablation results support the challenge-to-component mapping.
+3. Whether the full method is more than a simple combination.
+4. Whether the ablations support the challenge-to-component mapping.
 
-### RQ3: Robustness, sensitivity, or transfer
+#### RQ3: Robustness, sensitivity, or transfer
 
-Select the question that best matches the paper.
+Choose the analysis most relevant to the paper:
 
-Possible analyses include:
+1. Hyperparameter sensitivity.
+2. Robustness to perturbation.
+3. Distribution shift.
+4. Cross-dataset transfer.
+5. Cross-model transfer.
+6. Generalization to unseen settings.
+7. Calibration or selective prediction.
 
-1. Sensitivity to important hyperparameters.
-2. Robustness to noise, perturbations, or distribution shifts.
-3. Transfer across datasets, domains, tasks, or backbone models.
-4. Generalization to unseen settings.
-5. Calibration or selective prediction behavior.
+#### RQ4: Efficiency or qualitative behavior
 
-Do not include a sensitivity study only because it is conventional. Explain why the selected variable matters.
+When relevant, analyze:
 
-### RQ4: Efficiency or qualitative behavior
+1. Training cost.
+2. Inference latency.
+3. Token usage.
+4. Memory usage.
+5. Additional model calls.
+6. Accuracy-efficiency tradeoff.
+7. Representative qualitative cases.
 
-When relevant, analyze computational efficiency theoretically and empirically.
+#### Evaluation writing requirements
 
-Possible evidence includes:
+1. Begin each subsection with the research question.
+2. State the answer before discussing details.
+3. Explain trends instead of repeating table values.
+4. Compare against the strongest baseline.
+5. Report limitations and mixed results honestly.
+6. Ensure every main contribution has experimental support.
 
-1. Time complexity.
-2. Training cost.
-3. Inference latency.
-4. Token usage.
-5. Memory consumption.
-6. Additional LLM calls.
-7. Representative qualitative examples or visualizations.
+### 7.8 Conclusion
 
-Discuss the accuracy and efficiency tradeoff when one exists.
+Write one concise paragraph that includes:
 
-### Evaluation writing rules
+1. The problem.
+2. The challenge.
+3. The proposed method.
+4. The core components.
+5. The experimental conclusion.
+6. The broader implication.
 
-1. Lead each subsection with the research question.
-2. State the answer to the research question before listing details.
-3. Use prose to explain trends and causes, not to reproduce tables.
-4. Compare against the strongest baseline, not only the average baseline.
-5. Report negative or mixed findings when they affect the claim.
-6. Ensure that every main contribution has corresponding experimental evidence.
+Do not introduce new experiments, citations, or unsupported claims.
 
-## Conclusion
+## 8. Appendix Organization
 
-Write one concise paragraph.
+The appendix should support reproducibility and provide evidence that does not fit within the main-text page limit.
+
+Use the following structure when applicable.
+
+### Appendix A: Full Pipeline
 
 Include:
 
-1. The studied problem and its importance.
-2. The central limitation or challenge.
-3. The proposed method and its main components.
-4. The broad experimental scope and strongest conclusion.
-5. The practical or scientific implication.
+1. End-to-end pipeline.
+2. Pseudocode.
+3. Expanded framework description.
+4. Full inference or training procedure.
 
-Do not introduce new experiments, citations, or technical claims. Do not copy the abstract sentence by sentence.
-
-## Appendix Design
-
-The appendix should preserve reproducibility and provide evidence that does not fit within the configured main-text page limit.
-
-Use the following organization when applicable:
-
-### A. Full Pipeline
-
-Provide the complete end-to-end pipeline, algorithm, pseudocode, or expanded framework description.
-
-### B. Experimental Setup
+### Appendix B: Experimental Setup
 
 Include:
 
 1. Dataset descriptions and statistics.
-2. Backbone models or LLMs.
-3. Baseline definitions and implementation sources.
+2. Model details.
+3. Baseline definitions.
 4. Metrics.
 5. Data splits.
 6. Transfer protocols.
-7. Prompting, decoding, or sampling settings.
+7. Prompting and decoding settings.
 8. Reproducibility details.
 
-### C. Hyperparameter Space
+### Appendix C: Hyperparameter Space
 
-Provide a hyperparameter table containing search ranges, selected values, tuning criteria, and dataset-specific settings.
+Provide a table containing:
 
-### D. Hardware and Efficiency
+1. Search ranges.
+2. Selected values.
+3. Tuning criterion.
+4. Dataset-specific values.
 
-Report hardware, software environment, training time, inference time, memory usage, token cost, model calls, and other relevant efficiency measures. Include an efficiency table when comparisons are available.
+### Appendix D: Hardware and Efficiency
 
-### E. Additional Results
+Report:
 
-Place full dataset-level results, model-level results, robustness tests, sensitivity plots, extended ablations, statistical tests, error analysis, and qualitative examples here.
+1. Hardware.
+2. Software environment.
+3. Training time.
+4. Inference time.
+5. Memory usage.
+6. Token cost.
+7. Number of model calls.
+8. Efficiency comparisons.
 
-### F. Prompt Templates
+### Appendix E: Additional Results
 
-Provide complete system prompts, user prompts, output formats, demonstrations, parsing rules, and fallback procedures.
+Include:
 
-### G. Additional Analysis
+1. Full dataset-level tables.
+2. Full model-level tables.
+3. Additional ablations.
+4. Sensitivity results.
+5. Statistical tests.
+6. Error analysis.
+7. Qualitative cases.
 
-Include proofs, derivations, annotation details, human evaluation protocols, limitations, and further case studies when needed.
+### Appendix F: Prompt Templates
 
-## Compression and Expansion Policy
+Include:
 
-When the main text exceeds `P` pages:
+1. System prompts.
+2. User prompts.
+3. Demonstrations.
+4. Output schemas.
+5. Parsing rules.
+6. Fallback procedures.
 
-1. Remove repeated motivation and repeated result descriptions.
-2. Shorten Related Work before shortening Methodology.
-3. Move dataset statistics, baseline implementation details, prompt templates, and complete hyperparameters to the appendix.
-4. Keep only the equations required to understand the central method.
-5. Replace long result lists with one representative result and one trend statement.
-6. Merge low-value subsections.
-7. Delete experiments that do not support a claim.
+### Appendix G: Additional Analysis
 
-When the main text is too short:
+Include proofs, derivations, annotation details, human evaluation protocols, limitations, and further case studies.
 
-1. Strengthen the explanation of methodological motivation and component interaction.
-2. Add missing challenge-to-design reasoning.
-3. Expand analysis of why the results occur.
-4. Add a useful framework figure, algorithm, or qualitative analysis.
-5. Do not pad the paper with generic background or repeated claims.
+## 9. Full-Paper Review
 
+After drafting or revising the paper, perform a complete review.
 
-## Citation and Bibliography Audit
+### 9.1 Notation and terminology
 
-Citation verification is a mandatory and high-severity part of the paper review. A fabricated, incorrect, mismatched, or unverifiable citation is unacceptable.
+Check:
 
-Every bibliography entry must be checked online against authoritative records. Do not trust a citation only because it already appears in the `.bib` file, a draft, another paper, or model-generated text.
+1. Every symbol is introduced before first use.
+2. Every symbol has one consistent meaning.
+3. No symbol is reused for an unrelated concept.
+4. The same concept does not use multiple symbols without explanation.
+5. Scalars, vectors, matrices, sets, functions, and indices are distinguishable.
+6. Superscripts, subscripts, hats, bars, and boldface are consistent.
+7. Index ranges are defined.
+8. Acronyms are expanded at first use.
+9. Dataset, model, module, metric, and task names are consistent.
+10. Equations, algorithms, tables, figures, and appendices use the same notation.
 
-### Zero-hallucination requirement
+Report issues as:
 
-The final manuscript must contain no hallucinated or incorrectly attributed references.
+`location -> current notation -> problem -> correction`
 
-For every cited work, verify at least:
+### 9.2 Logical consistency
 
-1. Exact paper title.
-2. Complete and correctly ordered author list, subject to the chosen BibTeX style.
-3. Publication venue or journal.
-4. Publication year.
-5. Volume, issue, and page range when applicable.
-6. DOI, arXiv identifier, ACL Anthology identifier, OpenReview page, or other persistent identifier when applicable.
-7. Whether the work was actually accepted, published, or only released as a preprint.
-8. Whether the cited claim is genuinely supported by the referenced work.
-9. Whether the citation key points to the intended paper rather than a similarly titled work.
-10. Whether conference and journal versions have been confused.
-11. Whether workshop, findings, main-conference, and preprint versions are labeled correctly.
-12. Whether the paper has been retracted, withdrawn, superseded, or substantially corrected when that status affects the citation.
+Check:
 
-A plausible-looking reference is not sufficient evidence.
+1. The problem matches the formal task definition.
+2. The challenges follow from the problem setting.
+3. Each component addresses a stated challenge.
+4. The equations implement the prose description.
+5. Training, inference, and evaluation protocols are compatible.
+6. Assumptions are consistent across sections.
+7. Abstract and introduction claims are supported by experiments.
+8. Correlation is not presented as causation.
+9. Ablations isolate the intended component.
+10. Comparisons are fair.
+11. The conclusion does not overstate the evidence.
+12. No paragraph contradicts another section.
 
-### Preferred source hierarchy
+Classify each issue as:
 
-Prefer BibTeX obtained directly from authoritative or primary sources, including:
+1. Critical logical error.
+2. Unsupported claim.
+3. Missing reasoning step.
+4. Inconsistent assumption.
+5. Weak explanation.
 
-1. The official paper page or publisher page.
-2. The official conference proceedings.
-3. DBLP for computer science bibliographic metadata.
-4. ACL Anthology for ACL-family publications.
-5. OpenReview for venues that use OpenReview.
-6. arXiv for preprints and arXiv identifiers.
-7. Crossref or the DOI landing page.
-8. Google Scholar export when it accurately identifies the intended paper and is cross-checked against a primary source.
+### 9.3 Tables and figures
 
-Whenever possible, use BibTeX exported from the official paper page, official proceedings, DBLP, ACL Anthology, OpenReview, arXiv, the DOI record, or Google Scholar. Google Scholar may be used for discovery and export, but ambiguous or incomplete metadata should be verified against the paper’s official record.
+For every table and figure, check:
 
-Do not copy unverified BibTeX from random web pages, generated text, or another manuscript.
-
-### Entry-by-entry audit procedure
-
-For each entry in every referenced `.bib` file:
-
-1. Determine whether the entry is cited in the manuscript.
-2. Search for the exact title online.
-3. Open an authoritative record for the intended work.
-4. Compare title, authors, venue, year, identifiers, and publication status.
-5. Replace manually typed or suspicious metadata with authoritative exported BibTeX when available.
-6. Normalize the entry without changing factual metadata.
-7. Confirm that the citation key is unique.
-8. Confirm that the work supports the nearby claim in the manuscript.
-9. Flag ambiguous, unverifiable, unpublished, or mismatched entries.
-10. Remove uncited entries only when doing so does not conflict with the project’s bibliography workflow.
-
-For each factual mismatch, report:
-
-`BibTeX key -> incorrect field -> current value -> verified value -> authoritative source`
-
-### Claim-to-citation review
-
-Citation correctness includes both metadata and usage.
-
-Check every citation in context:
-
-1. The cited paper must support the sentence or clause to which it is attached.
-2. A survey should not be cited as the original source when the original work is relevant and available.
-3. A benchmark, dataset, model, or metric should cite its original or official paper.
-4. A method comparison should cite the exact method version being discussed.
-5. Broad historical claims should not rely on a single unrelated citation.
-6. Multiple citations grouped together must each be relevant to the stated claim.
-7. A citation should not be used to imply stronger evidence than the paper provides.
-8. Secondary citations should be replaced with primary citations when practical.
-9. Recently published or changed records must be checked for their current official status.
-10. A citation to a preprint must not be described as a conference publication unless verified.
-
-### BibTeX integrity checks
-
-Check the bibliography files for:
-
-1. Duplicate keys.
-2. Duplicate papers stored under different keys.
-3. Misspelled author names.
-4. Incorrect capitalization in titles, especially model names, datasets, and acronyms.
-5. Incorrect entry types such as using `@article` for conference proceedings without justification.
-6. Missing `booktitle`, `journal`, `year`, `publisher`, `pages`, `doi`, or identifier fields when applicable.
-7. Conflicting metadata across duplicate versions.
-8. Escaping errors for special characters and author names.
-9. Broken braces that alter title capitalization.
-10. Nonstandard or malformed fields that break the bibliography style.
-11. URLs that point to unrelated or unstable pages.
-12. Inconsistent treatment of preprints and published versions.
-
-Do not silently merge records when it is unclear whether they refer to the same version.
-
-### Required citation-audit outcome
-
-Before finalizing the paper:
-
-1. Every citation used in the manuscript has been verified online.
-2. Every bibliography entry used in the manuscript matches an authoritative record.
-3. Every citation supports the associated claim.
-4. No hallucinated paper, author, venue, year, title, or identifier remains.
-5. All uncertainty is explicitly reported rather than guessed.
-6. The manuscript is recompiled after bibliography corrections.
-7. The final PDF is inspected to ensure that all citations render correctly.
-
-Citation verification is a release-blocking requirement. If any cited work cannot be verified, do not mark the paper as ready for submission.
-
-## Full-Paper Consistency and Final Review
-
-After drafting or revising the paper, perform a dedicated full-paper review. This review is not limited to grammar. It must verify notation, logic, evidence, cross-references, formatting, narrative coherence, and page allocation.
-
-### 1. Notation and Terminology Consistency
-
-Check the entire paper for symbol-level and term-level consistency.
-
-Verify all of the following:
-
-1. Every symbol is introduced before its first use.
-2. Every symbol has one unique meaning throughout the paper.
-3. The same concept is not represented by multiple symbols unless the distinction is necessary and explicitly explained.
-4. A symbol is not reused for an unrelated concept.
-5. Scalar, vector, matrix, set, function, probability, and index notation are visually distinguishable.
-6. Superscripts, subscripts, hats, bars, and boldface have consistent meanings.
-7. Index ranges are defined and used consistently.
-8. Dataset, model, module, metric, and task names use the same capitalization and spelling throughout the paper.
-9. Acronyms are expanded at first mention and used consistently afterward.
-10. Equation references match the correct equations.
-11. Variables used in tables, captions, algorithms, or appendix sections match those in the main text.
-12. No symbol appears only once without explanation or necessity.
-
-Create a notation issue list when inconsistencies are found. For each issue, specify:
-
-`location -> current notation -> problem -> recommended correction`
-
-### 2. Logical Consistency
-
-Check the paper for local and global reasoning errors.
-
-Verify:
-
-1. The stated problem matches the formal task definition.
-2. The challenges in the introduction are real consequences of the problem setting.
-3. Each proposed component addresses a stated challenge.
-4. The method description supports the claimed capability.
-5. The equations implement the mechanism described in prose.
-6. The training objective, inference procedure, and evaluation protocol are mutually compatible.
-7. Assumptions introduced in one section are not violated elsewhere.
-8. Claims in the abstract and introduction are supported by the evaluation.
-9. Causal explanations are not inferred from purely correlational evidence.
-10. The ablation design isolates the intended component.
-11. Comparisons are made under fair and comparable settings.
-12. The conclusion does not overstate the evidence.
-13. No paragraph contradicts another section.
-14. No essential reasoning step is omitted between motivation and method design.
-15. Limitations or failure cases do not invalidate the main claim without acknowledgment.
-
-For every detected issue, classify it as:
-
-`critical logical error`, `unsupported claim`, `missing reasoning step`, `inconsistent assumption`, or `weak explanation`.
-
-### 3. Tables, Figures, Captions, and Their Interpretation
-
-Check every table and figure against the surrounding text.
-
-For each table and figure, verify:
-
-1. It is referenced in the main text before or near its appearance.
+1. It is referenced in the text.
 2. The reference number is correct.
-3. The caption is self-contained enough to understand the content.
-4. The row labels, column labels, legends, axes, units, and abbreviations are defined.
-5. The table or figure supports the claim made in the prose.
-6. The prose does not misread the trend, ranking, scale, or experimental condition.
-7. The discussion identifies the main pattern rather than repeating all values.
-8. Improvements are calculated using the correct direction and denominator.
-9. Percentage-point gains are not confused with relative percentage gains.
-10. Higher-is-better and lower-is-better metrics are clearly indicated.
-11. Missing values, failed runs, averages, standard deviations, and significance markers are explained.
-12. Dataset names, model names, and settings match the Experimental Setup section.
-13. Figure colors, line styles, and markers are distinguishable and described.
-14. Qualitative examples are representative and not presented as quantitative proof.
-15. Every main figure or table contributes to a claim. Remove or move low-value items to the appendix.
+3. The caption is self-contained.
+4. Labels, axes, units, legends, and abbreviations are defined.
+5. The visual supports the associated claim.
+6. The prose interprets the trend correctly.
+7. The discussion does not repeat all values.
+8. Improvement calculations are correct.
+9. Higher-is-better and lower-is-better directions are clear.
+10. Missing values and significance markers are explained.
+11. Dataset, model, and setting names match the setup section.
+12. The item contributes to a central claim.
 
-When checking numerical interpretation, recompute important differences whenever raw values are available.
+Recompute important numerical differences when raw values are available.
 
-### 4. Main Text and Appendix Alignment
+### 9.4 Main text and appendix
 
-Check that the appendix expands the main paper rather than introducing a disconnected second paper.
+Check:
 
-Verify:
+1. Every appendix reference points to the correct item.
+2. The appendix uses the same notation and terminology.
+3. Dataset splits, model settings, metrics, and hyperparameters match.
+4. Prompt templates match the described method.
+5. Additional results do not silently contradict the main claim.
+6. Essential method information is not hidden only in the appendix.
+7. Appendix equation numbering and cross-references are correct.
 
-1. Every appendix section is referenced from the main text when relevant.
-2. Every “see Appendix” statement points to the correct section, table, figure, algorithm, or prompt.
-3. The appendix uses the same notation, names, dataset splits, model settings, and metric definitions as the main text.
-4. Full experimental settings in the appendix agree with the summary in the main text.
-5. Additional tables preserve the same baseline ordering and formatting conventions.
-6. Hyperparameter values match those used to produce the reported results.
-7. Prompt templates match the prompting procedure described in the method.
-8. Transfer protocols and data splits do not contradict the main text.
-9. Additional ablations or results do not undermine the main claim without discussion.
-10. Essential information required to understand the core method is not hidden only in the appendix.
-11. Reproducibility details are moved to the appendix only when the main text still remains understandable.
-12. Appendix equation numbering and cross-references are correct.
+### 9.5 Table highlighting
 
-### 5. Table Highlighting and Ranking Conventions
+Unless the venue specifies otherwise:
 
-Check all quantitative tables for consistent visual marking.
+1. Bold the best result.
+2. Underline the second-best result.
+3. Rank larger values higher for higher-is-better metrics.
+4. Rank smaller values higher for lower-is-better metrics.
+5. Do not compare incompatible settings.
+6. Handle ties consistently.
+7. Do not highlight the proposed method automatically.
+8. Exclude non-comparable oracle settings when appropriate.
+9. Explain the convention in the caption or table note.
+10. Confirm that bold and underline render correctly in the PDF.
 
-Apply the following convention unless the venue or paper specifies otherwise:
+### 9.6 Story review
 
-1. Bold the best result in each comparable row or column.
-2. Underline the second-best result in each comparable row or column.
-3. For higher-is-better metrics, rank larger values higher.
-4. For lower-is-better metrics, rank smaller values higher.
-5. Do not compare values across incompatible settings, datasets, model sizes, or supervision levels.
-6. Treat ties consistently. When values are equal at the displayed precision, apply the same highlighting rule to tied results or report more precision.
-7. Do not highlight the proposed method automatically. Highlight strictly according to the values.
-8. Exclude unavailable values, oracle settings, or non-comparable upper bounds from normal ranking when appropriate, and state the exclusion.
-9. Ensure bold and underline formatting is preserved in the final compiled PDF.
-10. Check that the caption or note explains the ranking direction and formatting convention.
+Read the paper as one argument.
 
-For LaTeX tables, inspect the source for inconsistent uses of `\textbf{}`, `\underline{}`, custom macros, and manual formatting.
+Check:
 
-### 6. Full-Paper Story Review
+1. The problem is concrete and important.
+2. The prior-work limitation is specific.
+3. The method is motivated before it is introduced.
+4. The central intuition can be summarized clearly.
+5. The components form a coherent framework.
+6. The introduction, figure, methodology, and experiments follow the same order.
+7. Experiments answer claims in the same order.
+8. Every research question has a clear answer.
+9. The strongest evidence is in the main text.
+10. The conclusion resolves the opening problem.
 
-Read the paper as one continuous argument rather than as independent sections.
+Identify story breaks such as:
 
-Evaluate the story using the following questions:
+1. An unmotivated component.
+2. A challenge that disappears.
+3. An experiment unrelated to a contribution.
+4. A contribution without evidence.
+5. A framework figure that conflicts with the prose.
+6. Repeated motivation.
+7. A conclusion that emphasizes a different contribution.
 
-1. Is the problem important and concrete?
-2. Is the limitation of prior work specific and credible?
-3. Does the introduction create a clear need for the proposed method?
-4. Is the central intuition easy to state in one or two sentences?
-5. Do the named components form one coherent framework?
-6. Does the Methodology section follow the same conceptual order as the introduction and framework figure?
-7. Do the experiments answer the claims in the same order in which the claims are introduced?
-8. Does each research question have a clear answer?
-9. Is the strongest evidence placed in the main text?
-10. Are negative results, tradeoffs, and limitations handled honestly?
-11. Does the conclusion resolve the opening problem?
-12. Can the complete contribution be summarized as:
+### 9.7 Page allocation
 
-`problem -> gap -> insight -> method -> evidence -> implication`
-
-Identify any story break, including:
-
-1. A sudden method component with no prior motivation.
-2. A challenge that disappears after the introduction.
-3. An experiment that does not support a stated contribution.
-4. A contribution that is not demonstrated experimentally.
-5. A framework figure whose order differs from the prose.
-6. Repeated motivation that does not advance the argument.
-7. A conclusion that emphasizes a different contribution from the introduction.
-
-When revising, prioritize story coherence over preserving existing paragraph boundaries.
-
-### 7. Page Budget and Section Distribution
-
-Check the compiled manuscript rather than estimating only from source length.
-
-Let `P` denote `MAIN_TEXT_PAGE_LIMIT`. The main text must remain within `P` pages. When `FILL_TARGET = substantially_full`, the final permitted main-text page should be substantially full.
-
-Verify:
-
-1. The page-count scope follows the target venue’s rules.
-2. The main text does not exceed `P`.
-3. When full use of the page budget is required, the final permitted main-text page is not mostly blank.
-4. The Abstract occupies approximately `0.03P`.
-5. The Introduction occupies approximately `0.08P`.
-6. The Related Work section occupies approximately `0.08P`.
-7. The Problem Formulation section occupies approximately `0.07P`.
-8. The Methodology section occupies approximately `0.42P`.
-9. The Evaluation section occupies approximately `0.20P`.
-10. The Conclusion occupies approximately `0.02P`.
-11. Figures, tables, equations, algorithms, captions, headings, and transitions use approximately the remaining `0.10P`.
-12. The Methodology is not compressed below the level needed to understand the contribution.
-13. The Evaluation contains enough analysis to support all central claims.
-14. Related Work and setup details do not consume space needed by the core method.
-15. Appendix material is not duplicated unnecessarily in the main text.
-16. Page filling is achieved through useful technical explanation, not generic padding.
+Check the compiled PDF.
 
 For each section `s`, compute:
 
 `target_pages(s) = P × ratio(s)`
 
-Optionally compute the allocation deviation:
+Optionally compute:
 
 `deviation(s) = actual_pages(s) - target_pages(s)`
 
-Use the deviation only as a diagnostic signal. Do not force exact equality when figures, tables, equations, or venue formatting create reasonable layout variation.
+Use deviations as diagnostic signals, not rigid constraints.
 
-When the distribution is inappropriate:
+Verify:
 
-1. Move detailed setup, prompts, extra results, and hyperparameters to the appendix.
-2. Compress generic background and literature summaries.
-3. Expand missing design motivation, component interaction, result interpretation, or failure analysis.
-4. Remove low-value tables and figures.
-5. Recompile and recheck the actual page boundaries.
-6. Repeat until the total is within `P` and the section balance supports the paper’s central story.
+1. The manuscript follows the venue's page-count scope.
+2. The main text does not exceed `P`.
+3. The final permitted main-text page satisfies `FILL_TARGET`.
+4. Methodology remains the largest section.
+5. Evaluation supports all central claims.
+6. Related Work and setup details do not crowd out the method.
+7. Main-text and appendix material are not duplicated unnecessarily.
+8. Page filling comes from useful technical content.
 
-## Required Final Review Output
+## 10. Citation and Bibliography Audit
 
-When asked to check a complete paper, return a structured review with the following sections:
+Citation verification is mandatory and release-blocking.
 
-1. Critical issues that may affect correctness or acceptance.
+A fabricated, incorrect, mismatched, or unverifiable citation is unacceptable.
+
+### 10.1 Zero-hallucination requirement
+
+For every cited work, verify online:
+
+1. Exact title.
+2. Author list and order.
+3. Venue or journal.
+4. Publication year.
+5. Volume, issue, and pages when applicable.
+6. DOI, arXiv ID, ACL Anthology ID, OpenReview page, or other persistent identifier.
+7. Publication status.
+8. Conference, workshop, findings, journal, and preprint version.
+9. Whether the work supports the cited claim.
+10. Whether the citation key points to the intended work.
+11. Whether the work was retracted, withdrawn, superseded, or corrected.
+
+A plausible-looking citation is not sufficient.
+
+### 10.2 Preferred sources
+
+Prefer metadata and BibTeX from:
+
+1. Official paper or publisher page.
+2. Official conference proceedings.
+3. DBLP.
+4. ACL Anthology.
+5. OpenReview.
+6. arXiv.
+7. Crossref or DOI landing page.
+8. Google Scholar export, cross-checked against a primary source.
+
+Whenever possible, replace manually typed or suspicious entries with BibTeX exported from an authoritative source.
+
+Do not copy unverified BibTeX from random web pages, generated text, or another manuscript.
+
+### 10.3 Entry-by-entry procedure
+
+For each cited BibTeX entry:
+
+1. Search the exact title online.
+2. Open an authoritative record.
+3. Compare all bibliographic fields.
+4. Confirm publication status.
+5. Confirm that the work supports the nearby claim.
+6. Replace incorrect metadata.
+7. Confirm that the key is unique.
+8. Flag unverifiable or ambiguous records.
+9. Recompile after corrections.
+
+Report mismatches as:
+
+`BibTeX key -> incorrect field -> current value -> verified value -> source`
+
+### 10.4 BibTeX integrity
+
+Check:
+
+1. Duplicate keys.
+2. Duplicate papers under different keys.
+3. Misspelled author names.
+4. Incorrect title capitalization.
+5. Incorrect entry types.
+6. Missing venue, year, pages, DOI, or identifier fields.
+7. Conflicting metadata across versions.
+8. Escaping errors.
+9. Broken braces.
+10. Malformed fields.
+11. Unrelated or unstable URLs.
+12. Inconsistent treatment of preprints and published versions.
+
+Do not mark the paper ready for submission while any cited work remains unverified.
+
+## 11. LaTeX Editing and Validation
+
+This skill is intended for direct editing of a LaTeX paper.
+
+### 11.1 Compilation command
+
+Compile from the project root with:
+
+```bash
+latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+```
+
+Use this command:
+
+1. Before editing.
+2. After every substantial revision.
+3. After bibliography changes.
+4. Before the final review.
+
+Do not claim completion while compilation fails.
+
+### 11.2 Compilation workflow
+
+1. Compile the current manuscript.
+2. Inspect the first blocking error.
+3. Correct the source.
+4. Recompile.
+5. Repeat until compilation succeeds.
+6. Inspect the generated PDF.
+
+When compilation fails, report:
+
+`first blocking error -> source location -> likely cause -> correction`
+
+### 11.3 Severe errors
+
+Prioritize:
+
+1. Undefined citations.
+2. Undefined references.
+3. Duplicate labels.
+4. Labels attached to the wrong object.
+5. Duplicate BibTeX keys.
+6. Missing figures, tables, style files, or bibliography files.
+7. Unmatched braces.
+8. Unclosed environments.
+9. Unclosed math mode.
+10. Invalid commands.
+11. Package conflicts.
+12. Incorrect file paths.
+13. Fatal bibliography errors.
+14. Numbering inconsistencies.
+
+Do not suppress a severe error merely to produce a PDF.
+
+### 11.4 Equation formatting and numbering
+
+Prefer numbered display equations when the formula is important to the method, analysis, or later discussion.
+
+Use:
+
+```latex
+\begin{equation}
+    ...
+    \label{eq:descriptive_name}
+\end{equation}
+```
+
+Requirements:
+
+1. Use `equation` for important single-line formulas.
+2. Add a descriptive `\label{eq:...}` when the equation is referenced later.
+3. Refer to numbered equations with `Eq.~\eqref{eq:...}` or the venue's preferred style.
+4. Use `aligned`, `split`, or `gathered` inside `equation` for multi-line expressions that should share one equation number.
+5. Use `align` when multiple lines require separate equation numbers.
+6. Use unnumbered math only for minor expressions that are never referenced.
+7. Do not number every trivial formula.
+8. Do not use manual equation numbers.
+9. Keep label placement consistent throughout the project.
+10. Ensure every referenced equation has a unique label.
+
+### 11.5 Warning reduction
+
+After blocking errors are resolved, reduce important warnings.
+
+Prioritize:
+
+1. Undefined citations and references.
+2. Multiply defined labels.
+3. Visible overfull `\hbox` and `\vbox`.
+4. Equations extending beyond the column.
+5. Tables wider than the available width.
+6. Captions, URLs, or technical terms crossing margins.
+7. Poor float placement.
+8. Isolated headings and nearly empty columns.
+9. Malformed bibliography output.
+
+For overfull equations:
+
+1. Use `aligned`, `split`, `multline`, or `align`.
+2. Introduce intermediate notation.
+3. Move secondary derivations to the appendix.
+4. Shorten textual annotations inside equations.
+5. Avoid globally shrinking equations.
+6. Avoid unreadably small fonts.
+7. Preserve mathematical meaning when adding line breaks.
+
+For overfull prose and tables:
+
+1. Rewrite long sentences.
+2. Use breakable URL handling.
+3. Shorten repeated column headings.
+4. Move detailed columns to the appendix.
+5. Use full-width floats only when allowed.
+6. Do not violate margins or font requirements.
+
+Not every harmless underfull warning needs correction. Focus on warnings that affect correctness or visible quality.
+
+### 11.6 Final LaTeX validation
+
+Before completion:
+
+1. Run the compilation command successfully.
+2. Confirm that no citation is undefined.
+3. Confirm that no reference is undefined.
+4. Confirm that no label is multiply defined.
+5. Confirm that all numbered objects are referenced correctly.
+6. Confirm that important equations use appropriate numbered environments.
+7. Confirm that severe overfull issues are corrected or justified.
+8. Inspect the final PDF.
+9. Verify page count, anonymization, margins, fonts, bibliography, and supplementary material.
+10. Recheck that table bolding and underlining render correctly.
+
+## 12. Required Review Output
+
+When checking a complete paper, return:
+
+1. Critical correctness or acceptance issues.
 2. Notation and terminology issues.
 3. Logical consistency issues.
 4. Citation and bibliography issues.
@@ -815,56 +854,60 @@ When asked to check a complete paper, return a structured review with the follow
 6. Main-text and appendix mismatches.
 7. Table highlighting and formatting issues.
 8. Story and contribution issues.
-9. Page-budget and section-distribution issues.
-10. Prioritized revision plan.
+9. Page-budget issues.
+10. LaTeX compilation and layout issues.
+11. Prioritized revision plan.
 
-Each reported issue should include:
+For every issue, use:
 
 `location -> issue -> why it matters -> concrete revision`
 
-Do not provide only general suggestions. Point to specific sections, equations, tables, figures, or claims whenever the source is available.
+Do not provide only general advice.
 
-## Final Quality Checklist
+## 13. Final Checklist
 
-Before finalizing the paper, verify all of the following:
+Before marking the paper complete, verify:
 
-1. `MAIN_TEXT_PAGE_LIMIT = P` and `PAGE_COUNT_SCOPE` are explicitly defined.
-2. The title contains a memorable method name and a precise task description.
-3. The abstract contains the problem, challenge, prior limitation, method, components, experiment scope, and main result.
-4. The introduction follows the six-paragraph structure.
-5. Each challenge maps to a named component.
-6. The method is presented as a coherent pipeline rather than a stack of modules.
-7. The Related Work section contains two or three focused subsections.
-8. The Problem Formulation section defines all essential notation.
-9. The Methodology section receives the largest share of space.
-10. The Evaluation section is organized by research questions.
-11. Ablations use the same component names as the Methodology section.
-12. The prose does not over-report table values.
-13. No em dash or en dash is used as sentence punctuation.
-14. No result, citation, or implementation detail is fabricated.
-15. The appendix contains the full pipeline, setup, hyperparameters, hardware and efficiency, additional results, and prompt templates.
-16. The conclusion is concise and introduces no new claims.
-17. Every symbol is defined before use and has one consistent meaning.
-18. No notation conflict, undefined symbol, or unnecessary symbol reuse remains.
-19. The abstract, introduction, method, experiments, and conclusion make mutually consistent claims.
-20. Every table and figure is correctly referenced, described, and interpreted.
-21. The main text and appendix use matching settings, notation, and cross-references.
-22. Best results are bolded and second-best results are underlined under the correct metric direction.
-23. The complete paper follows one coherent problem-gap-insight-method-evidence story.
-24. The compiled main text remains within `P`, satisfies `FILL_TARGET`, and follows the proportional section distribution.
-25. Every cited bibliography entry has been verified online against an authoritative source.
-26. No title, author, venue, year, publication status, identifier, or claim-to-citation mismatch remains.
-27. The final LaTeX compilation succeeds without undefined citations, undefined references, or multiply defined labels.
-28. Severe overfull equations, tables, and prose have been corrected or explicitly justified.
+1. `MAIN_TEXT_PAGE_LIMIT = P` is defined.
+2. The paper follows one coherent story.
+3. The title is precise and memorable.
+4. The abstract contains problem, challenge, prior limitation, method, components, evidence, and implication.
+5. The introduction follows the six-paragraph structure.
+6. Every challenge maps to a named component.
+7. The method is a coherent pipeline.
+8. The Related Work contains two or three focused subsections.
+9. All essential notation is defined.
+10. Methodology receives the largest page allocation.
+11. Evaluation is organized by research questions.
+12. Every contribution has experimental support.
+13. The prose does not over-report table values.
+14. The best table result is bolded and the second-best result is underlined.
+15. Main text and appendix agree.
+16. No unsupported claim remains.
+17. No symbol conflict remains.
+18. No table or figure is misinterpreted.
+19. Every cited work has been verified online.
+20. No title, author, venue, year, identifier, publication-status, or claim-to-citation mismatch remains.
+21. The main text remains within `P`.
+22. The final permitted main-text page satisfies `FILL_TARGET`.
+23. Important formulas use numbered equation environments when appropriate.
+24. The LaTeX project compiles successfully.
+25. No citation or reference is undefined.
+26. No label is multiply defined.
+27. Severe overfull issues are corrected or justified.
+28. The final PDF has been visually inspected.
 
-## Output Behavior
+## 14. Output Behavior
 
-When asked to write or revise a paper:
+When asked to write, revise, or check a paper:
 
-1. Produce polished academic English rather than generic writing advice.
-2. Preserve valid technical content from the source material.
-3. Improve logical flow, terminology, and challenge-to-method alignment.
-4. Suggest appendix transfers when the main text is crowded.
-5. Mark unsupported information with precise placeholders.
-6. When a compiled PDF is available, inspect the actual page usage, calculate section targets from `P`, and do not rely only on word count.
-7. Return LaTeX-ready text when the input is written in LaTeX.
+1. Produce polished academic English.
+2. Preserve valid technical content.
+3. Improve challenge-to-method alignment.
+4. Keep notation and names consistent.
+5. Suggest appendix transfers when space is limited.
+6. Use placeholders for missing evidence.
+7. Return LaTeX-ready text when editing LaTeX.
+8. Compile and inspect the PDF when the project files are available.
+9. Verify citations online when citation review is requested or when submission readiness is being assessed.
+10. Do not mark the paper ready when any release-blocking issue remains.

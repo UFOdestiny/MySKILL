@@ -3,31 +3,107 @@ name: ai-paper-writing
 description: Draft, revise, and compress an AI, NLP, or LLM conference paper under a configurable main-text page limit. Use this skill for full-paper writing, section rewriting, proportional page-budget planning, method naming, experiment organization, appendix design, and final consistency review.
 ---
 
-# Configurable-Page AI Paper Writing
+# AI Paper Writing
 
 
-## LaTeX Compilation Command
+## LaTeX Editing, Compilation, and Validation
 
-This skill is intended for editing and validating a LaTeX paper.
+This skill is intended for directly editing, compiling, and validating a LaTeX research paper.
 
-You can compile the paper from the project root with:
+### Compilation command
+
+At the beginning of the workflow, compile the manuscript from the project root with:
 
 ```bash
 latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 ```
 
-Use the same command again after every substantial revision and before the final review.
+Use the same command after every substantial revision and before the final review.
 
-The compilation workflow should be:
+The standard workflow is:
 
 1. Compile the current manuscript before editing.
-2. Inspect compilation errors and warnings.
-3. Edit the LaTeX source.
+2. Inspect the first blocking error and the surrounding source.
+3. Correct the LaTeX source rather than hiding the error.
 4. Recompile with the same command.
-5. Repeat until the paper compiles successfully.
-6. Inspect the generated PDF for page count, section balance, figure placement, table placement, cross-references, and visible formatting issues.
+5. Repeat until compilation succeeds.
+6. Inspect the generated PDF for page count, section balance, figure placement, table placement, equation layout, cross-references, bibliography output, and visible formatting problems.
 
-Do not claim that the manuscript is complete when the final LaTeX compilation fails. When compilation fails, report the first blocking error, its source location when available, and the concrete correction.
+Do not claim that the manuscript is complete while the final compilation fails.
+
+### Severe error resolution
+
+Prioritize errors that affect correctness, reproducibility, or the final PDF.
+
+Check and resolve the following whenever possible:
+
+1. Missing citations, including unresolved `\cite{...}` keys and citations absent from the bibliography.
+2. Missing references, including unresolved `\ref{...}`, `\autoref{...}`, `\cref{...}`, and related commands.
+3. Duplicate labels such as repeated `\label{...}` identifiers.
+4. Undefined labels or labels attached to the wrong equation, figure, table, algorithm, theorem, or section.
+5. Duplicate BibTeX keys.
+6. Missing figures, tables, style files, bibliography files, or other required inputs.
+7. Broken environments, unmatched braces, unclosed math mode, and invalid command usage.
+8. Package conflicts and incompatible document-class options.
+9. Incorrect figure or table paths.
+10. Fatal bibliography-processing errors.
+11. Numbering inconsistencies caused by misplaced labels or manual numbering.
+12. Cross-references that remain unresolved after the required compilation passes.
+
+When compilation fails, report:
+
+`first blocking error -> source location -> likely cause -> concrete correction`
+
+Do not suppress a severe error merely to obtain a PDF.
+
+### Warning reduction
+
+After resolving blocking errors, reduce important warnings and visible layout defects.
+
+Prioritize:
+
+1. Undefined citations and references.
+2. Multiply defined labels.
+3. Overfull `\hbox` and `\vbox` warnings that produce visible overflow.
+4. Equations extending beyond the column or page boundary.
+5. Tables wider than the available column or text width.
+6. Captions, URLs, code, or technical terms that overflow margins.
+7. Figures placed far from their first discussion.
+8. Widows, orphans, isolated headings, and nearly empty final columns when they damage readability.
+9. Float congestion that separates a table or figure from its interpretation.
+10. Bibliography entries with malformed output.
+
+For overfull equations, prefer mathematically readable corrections:
+
+1. Break long derivations across `aligned`, `split`, `multline`, or equivalent environments.
+2. Introduce intermediate notation when it improves clarity.
+3. Move nonessential derivations to the appendix.
+4. Shorten textual annotations inside equations.
+5. Avoid shrinking equations globally or using unreadably small font sizes.
+6. Avoid manually forcing line breaks that damage mathematical meaning.
+
+For overfull prose, tables, and references:
+
+1. Rewrite long sentences or technical phrases.
+2. Use appropriate breakable URL and bibliography handling.
+3. Reformat tables, abbreviate repeated headings, or move detailed columns to the appendix.
+4. Use a full-width table only when the venue allows it and the content requires it.
+5. Do not solve overflow by violating venue margins or font-size requirements.
+
+Not every harmless underfull warning needs correction. Focus first on warnings that indicate incorrect references, missing content, margin overflow, unreadable equations, or visibly poor layout.
+
+### Final LaTeX validation
+
+Before considering the paper complete:
+
+1. Run the compilation command from a clean enough state to confirm reproducibility.
+2. Confirm that the command exits successfully.
+3. Confirm that no citation or reference remains undefined.
+4. Confirm that no label is multiply defined.
+5. Confirm that all figures, tables, algorithms, equations, and appendix items are numbered and referenced correctly.
+6. Confirm that severe overfull warnings have been removed or explicitly justified.
+7. Inspect the final PDF rather than relying only on the log.
+8. Verify that bibliography, page count, anonymization, margins, fonts, and supplementary material follow the target venue requirements.
 
 ## Purpose
 
@@ -422,6 +498,119 @@ When the main text is too short:
 5. Do not pad the paper with generic background or repeated claims.
 
 
+## Citation and Bibliography Audit
+
+Citation verification is a mandatory and high-severity part of the paper review. A fabricated, incorrect, mismatched, or unverifiable citation is unacceptable.
+
+Every bibliography entry must be checked online against authoritative records. Do not trust a citation only because it already appears in the `.bib` file, a draft, another paper, or model-generated text.
+
+### Zero-hallucination requirement
+
+The final manuscript must contain no hallucinated or incorrectly attributed references.
+
+For every cited work, verify at least:
+
+1. Exact paper title.
+2. Complete and correctly ordered author list, subject to the chosen BibTeX style.
+3. Publication venue or journal.
+4. Publication year.
+5. Volume, issue, and page range when applicable.
+6. DOI, arXiv identifier, ACL Anthology identifier, OpenReview page, or other persistent identifier when applicable.
+7. Whether the work was actually accepted, published, or only released as a preprint.
+8. Whether the cited claim is genuinely supported by the referenced work.
+9. Whether the citation key points to the intended paper rather than a similarly titled work.
+10. Whether conference and journal versions have been confused.
+11. Whether workshop, findings, main-conference, and preprint versions are labeled correctly.
+12. Whether the paper has been retracted, withdrawn, superseded, or substantially corrected when that status affects the citation.
+
+A plausible-looking reference is not sufficient evidence.
+
+### Preferred source hierarchy
+
+Prefer BibTeX obtained directly from authoritative or primary sources, including:
+
+1. The official paper page or publisher page.
+2. The official conference proceedings.
+3. DBLP for computer science bibliographic metadata.
+4. ACL Anthology for ACL-family publications.
+5. OpenReview for venues that use OpenReview.
+6. arXiv for preprints and arXiv identifiers.
+7. Crossref or the DOI landing page.
+8. Google Scholar export when it accurately identifies the intended paper and is cross-checked against a primary source.
+
+Whenever possible, use BibTeX exported from the official paper page, official proceedings, DBLP, ACL Anthology, OpenReview, arXiv, the DOI record, or Google Scholar. Google Scholar may be used for discovery and export, but ambiguous or incomplete metadata should be verified against the paper’s official record.
+
+Do not copy unverified BibTeX from random web pages, generated text, or another manuscript.
+
+### Entry-by-entry audit procedure
+
+For each entry in every referenced `.bib` file:
+
+1. Determine whether the entry is cited in the manuscript.
+2. Search for the exact title online.
+3. Open an authoritative record for the intended work.
+4. Compare title, authors, venue, year, identifiers, and publication status.
+5. Replace manually typed or suspicious metadata with authoritative exported BibTeX when available.
+6. Normalize the entry without changing factual metadata.
+7. Confirm that the citation key is unique.
+8. Confirm that the work supports the nearby claim in the manuscript.
+9. Flag ambiguous, unverifiable, unpublished, or mismatched entries.
+10. Remove uncited entries only when doing so does not conflict with the project’s bibliography workflow.
+
+For each factual mismatch, report:
+
+`BibTeX key -> incorrect field -> current value -> verified value -> authoritative source`
+
+### Claim-to-citation review
+
+Citation correctness includes both metadata and usage.
+
+Check every citation in context:
+
+1. The cited paper must support the sentence or clause to which it is attached.
+2. A survey should not be cited as the original source when the original work is relevant and available.
+3. A benchmark, dataset, model, or metric should cite its original or official paper.
+4. A method comparison should cite the exact method version being discussed.
+5. Broad historical claims should not rely on a single unrelated citation.
+6. Multiple citations grouped together must each be relevant to the stated claim.
+7. A citation should not be used to imply stronger evidence than the paper provides.
+8. Secondary citations should be replaced with primary citations when practical.
+9. Recently published or changed records must be checked for their current official status.
+10. A citation to a preprint must not be described as a conference publication unless verified.
+
+### BibTeX integrity checks
+
+Check the bibliography files for:
+
+1. Duplicate keys.
+2. Duplicate papers stored under different keys.
+3. Misspelled author names.
+4. Incorrect capitalization in titles, especially model names, datasets, and acronyms.
+5. Incorrect entry types such as using `@article` for conference proceedings without justification.
+6. Missing `booktitle`, `journal`, `year`, `publisher`, `pages`, `doi`, or identifier fields when applicable.
+7. Conflicting metadata across duplicate versions.
+8. Escaping errors for special characters and author names.
+9. Broken braces that alter title capitalization.
+10. Nonstandard or malformed fields that break the bibliography style.
+11. URLs that point to unrelated or unstable pages.
+12. Inconsistent treatment of preprints and published versions.
+
+Do not silently merge records when it is unclear whether they refer to the same version.
+
+### Required citation-audit outcome
+
+Before finalizing the paper:
+
+1. Every citation used in the manuscript has been verified online.
+2. Every bibliography entry used in the manuscript matches an authoritative record.
+3. Every citation supports the associated claim.
+4. No hallucinated paper, author, venue, year, title, or identifier remains.
+5. All uncertainty is explicitly reported rather than guessed.
+6. The manuscript is recompiled after bibliography corrections.
+7. The final PDF is inspected to ensure that all citations render correctly.
+
+Citation verification is a release-blocking requirement. If any cited work cannot be verified, do not mark the paper as ready for submission.
+
 ## Full-Paper Consistency and Final Review
 
 After drafting or revising the paper, perform a dedicated full-paper review. This review is not limited to grammar. It must verify notation, logic, evidence, cross-references, formatting, narrative coherence, and page allocation.
@@ -621,12 +810,13 @@ When asked to check a complete paper, return a structured review with the follow
 1. Critical issues that may affect correctness or acceptance.
 2. Notation and terminology issues.
 3. Logical consistency issues.
-4. Table and figure issues.
-5. Main-text and appendix mismatches.
-6. Table highlighting and formatting issues.
-7. Story and contribution issues.
-8. Page-budget and section-distribution issues.
-9. Prioritized revision plan.
+4. Citation and bibliography issues.
+5. Table and figure issues.
+6. Main-text and appendix mismatches.
+7. Table highlighting and formatting issues.
+8. Story and contribution issues.
+9. Page-budget and section-distribution issues.
+10. Prioritized revision plan.
 
 Each reported issue should include:
 
@@ -662,6 +852,10 @@ Before finalizing the paper, verify all of the following:
 22. Best results are bolded and second-best results are underlined under the correct metric direction.
 23. The complete paper follows one coherent problem-gap-insight-method-evidence story.
 24. The compiled main text remains within `P`, satisfies `FILL_TARGET`, and follows the proportional section distribution.
+25. Every cited bibliography entry has been verified online against an authoritative source.
+26. No title, author, venue, year, publication status, identifier, or claim-to-citation mismatch remains.
+27. The final LaTeX compilation succeeds without undefined citations, undefined references, or multiply defined labels.
+28. Severe overfull equations, tables, and prose have been corrected or explicitly justified.
 
 ## Output Behavior
 

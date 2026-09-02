@@ -324,11 +324,88 @@ When relevant, distinguish:
 
 ### 7.7 Evaluation
 
-Organize the section around research questions.
+Organize the Evaluation section around a flexible set of research questions.
+
+The number, order, and numbering of the research questions are not fixed. Select and order them according to the paper's central claims, the importance of the evidence, and the available main-text space. The strongest and most essential research questions should appear first.
+
+Research questions that cannot fit in the main text may be moved to the appendix. When this happens:
+
+1. Keep the most important findings in the main text.
+2. Clearly reference the appendix from the Evaluation section.
+3. Preserve the same RQ number and descriptive label in both locations.
+4. Do not move evidence that is essential to a central contribution out of the main text.
+5. Do not renumber appendix RQs in a way that conflicts with references in the main text.
+
+#### Research-question overview
+
+At the beginning of the Evaluation section, list all research questions that structure the experiments.
+
+Each item must contain:
+
+1. An RQ number.
+2. A short descriptive label in parentheses, preferably one or two words.
+3. A direct question that the corresponding subsection will answer.
+
+Use the following LaTeX format:
+
+```latex
+\begin{itemize}
+    \item \textbf{RQ 1 (Performance):} How does \m compare against state-of-the-art baselines?
+    \item \textbf{RQ 2 (Ablation Study):} What are the contributions of each component to the overall effectiveness of \m?
+    \item \textbf{RQ 3 (Efficiency):} Does \m maintain a competitive computational cost?
+    % Add, remove, or reorder research questions as needed.
+\end{itemize}
+```
+
+The labels and questions should be customized to the paper. Suitable labels include:
+
+1. Performance.
+2. Ablation Study.
+3. Efficiency.
+4. Robustness.
+5. Transferability.
+6. Generalization.
+7. Sensitivity.
+8. Calibration.
+9. Scalability.
+10. Interpretability.
+11. Error Analysis.
+12. Case Study.
+
+Use concise labels. Do not place a full sentence inside the parentheses.
+
+Each question should:
+
+1. Be answerable by the experiments in its subsection.
+2. Correspond to a central claim, design choice, or practical concern.
+3. Avoid vague wording such as “Is the method good?”
+4. Name the proposed method consistently, preferably through the paper's method macro such as `\m`.
+5. Use parallel grammatical structure across the RQ list.
+6. Avoid combining several unrelated evaluations into one question.
+
+#### Ordering and selection
+
+Choose the order according to the paper rather than following a fixed template.
+
+A common order is:
+
+1. Overall performance.
+2. Component ablation.
+3. Robustness, transferability, or generalization.
+4. Efficiency.
+5. Sensitivity, qualitative analysis, or error analysis.
+
+However, reorder the RQs when another sequence better supports the paper's story. For example:
+
+1. Put efficiency earlier when low cost is a central contribution.
+2. Put transferability earlier when cross-model or cross-domain generalization is the main claim.
+3. Put robustness earlier when reliability is the primary problem.
+4. Combine closely related analyses only when they answer one coherent question.
+5. Move secondary sensitivity studies, extended case studies, or additional transfer settings to the appendix when space is limited.
 
 #### Experimental Setup
 
-Briefly summarize:
+After the RQ overview, briefly summarize the information required to interpret the experiments:
 
 1. Datasets.
 2. Models or LLMs.
@@ -338,62 +415,138 @@ Briefly summarize:
 6. Transfer protocol.
 7. Evaluation settings.
 
-Move full details to the appendix.
+Keep only essential setup information in the main text. Move dataset statistics, complete baseline details, prompt templates, hyperparameters, and implementation details to the appendix.
 
-#### RQ1: Overall effectiveness
+#### RQ subsection structure
 
-Answer whether the proposed method outperforms the strongest relevant baselines.
+Create one subsection for each main-text RQ.
 
-Discuss:
+Use a heading that preserves both the number and descriptive label, for example:
 
-1. Overall trend.
-2. Strongest representative gain.
-3. Settings with smaller or inconsistent gains.
-4. Technical explanation.
+```latex
+\subsection{RQ 1: Performance}
+```
 
-#### RQ2: Component contribution
+Each RQ subsection should follow this structure:
 
-Use ablation studies to remove, replace, or simplify each named component.
+1. Restate the research question when needed.
+2. Give the direct answer in the opening sentence or paragraph.
+3. Present the relevant table, figure, or analysis.
+4. Explain the main trend rather than repeating all values.
+5. Compare against the strongest relevant baseline.
+6. Discuss exceptions, tradeoffs, or failure cases.
+7. End with a concise answer to the RQ.
 
-Explain:
+#### Common RQ designs
 
-1. Which component contributes most.
-2. Whether components are complementary.
-3. Whether the full method is more than a simple combination.
-4. Whether the ablations support the challenge-to-component mapping.
+##### Performance
 
-#### RQ3: Robustness, sensitivity, or transfer
+Typical question:
 
-Choose the analysis most relevant to the paper:
+```latex
+\item \textbf{RQ 1 (Performance):} How does \m compare against state-of-the-art baselines?
+```
 
-1. Hyperparameter sensitivity.
-2. Robustness to perturbation.
-3. Distribution shift.
-4. Cross-dataset transfer.
-5. Cross-model transfer.
-6. Generalization to unseen settings.
-7. Calibration or selective prediction.
+Analyze:
 
-#### RQ4: Efficiency or qualitative behavior
+1. Overall results across datasets, models, or settings.
+2. The strongest representative improvement.
+3. Cases with smaller or inconsistent gains.
+4. The likely technical reason for the trend.
 
-When relevant, analyze:
+##### Ablation Study
+
+Typical question:
+
+```latex
+\item \textbf{RQ 2 (Ablation Study):} What are the contributions of each component to the overall effectiveness of \m?
+```
+
+Analyze:
+
+1. The effect of removing each named component.
+2. The effect of replacing or simplifying each component.
+3. Whether components are complementary.
+4. Whether the full framework is more than a simple combination.
+5. Whether the results support the challenge-to-component mapping.
+
+##### Efficiency
+
+Typical question:
+
+```latex
+\item \textbf{RQ 3 (Efficiency):} Does \m maintain a competitive computational cost?
+```
+
+Analyze as applicable:
 
 1. Training cost.
 2. Inference latency.
 3. Token usage.
 4. Memory usage.
-5. Additional model calls.
-6. Accuracy-efficiency tradeoff.
-7. Representative qualitative cases.
+5. Number of model calls.
+6. Throughput.
+7. Accuracy-efficiency tradeoff.
+
+##### Robustness, transferability, or generalization
+
+Possible questions include:
+
+```latex
+\item \textbf{RQ 4 (Robustness):} How robust is \m under input perturbations or distribution shifts?
+\item \textbf{RQ 5 (Transferability):} How well does \m transfer across datasets, domains, or backbone models?
+\item \textbf{RQ 6 (Generalization):} Can \m generalize to unseen settings?
+```
+
+Select only the questions supported by actual experiments.
+
+##### Sensitivity or analysis
+
+Possible questions include:
+
+```latex
+\item \textbf{RQ 7 (Sensitivity):} How sensitive is \m to its key hyperparameters?
+\item \textbf{RQ 8 (Error Analysis):} What types of errors remain after applying \m?
+\item \textbf{RQ 9 (Case Study):} How does \m behave in representative examples?
+```
+
+These analyses are often suitable for the appendix when they are not central to the main claim.
+
+#### Appendix RQs
+
+When an RQ is moved to the appendix:
+
+1. Introduce it in the main-text RQ overview only if readers need the complete experimental map.
+2. Mark or state that its detailed analysis appears in the appendix.
+3. Use a matching appendix heading, such as:
+
+```latex
+\subsection{RQ 5: Sensitivity}
+```
+
+4. Reference it explicitly from the main text, for example:
+
+```latex
+We further study hyperparameter sensitivity in Appendix~\ref{app:sensitivity}.
+```
+
+5. Keep the full question, experimental setup, results, and answer together.
+6. Do not use the appendix to hide a weak or contradictory result.
+7. Summarize any finding that materially affects the main conclusion in the main text.
 
 #### Evaluation writing requirements
 
-1. Begin each subsection with the research question.
-2. State the answer before discussing details.
-3. Explain trends instead of repeating table values.
-4. Compare against the strongest baseline.
-5. Report limitations and mixed results honestly.
-6. Ensure every main contribution has experimental support.
+1. Begin the Evaluation section with the formatted RQ list.
+2. Keep RQ numbering, labels, subsection titles, table references, and appendix references consistent.
+3. State the answer to each RQ before detailed interpretation.
+4. Explain trends instead of reproducing tables.
+5. Compare against the strongest appropriate baseline.
+6. Report limitations and mixed findings honestly.
+7. Ensure every main contribution has corresponding experimental evidence.
+8. Keep the order of RQs aligned with the order of claims in the introduction when practical.
+9. Reorder, add, remove, or move RQs to the appendix when this improves the paper's story and page balance.
+10. Do not force a fixed number of RQs.
+
 
 ### 7.8 Conclusion
 
